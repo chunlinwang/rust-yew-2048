@@ -1,36 +1,28 @@
 use rand::{thread_rng, Rng};
+use std::io;
 
 #[derive(Debug)]
 pub struct Matrix {
     pub direction: u64,
     pub data: [[usize; 4]; 4],
-    pub field_occupied: [bool; 16],
+    pub occupied_field: [bool; 16],
 }
-
 
 impl Matrix {
     pub fn get_new_field_index(&mut self) -> bool {
         let mut positions = Vec::new();
         for index in 0..16 {
-            if self.field_occupied[index] == false {
+            if self.occupied_field[index] == false {
                 positions.push(index);
             }
         }
-        let reset_count =  positions.iter().count();
+        let reset_count = positions.iter().count();
 
         if reset_count > 0 {
-            println!(" p {:?}", positions);
-
             let mut rng = thread_rng();
             let index_num: usize = rng.gen_range(0..reset_count);
-            self.field_occupied[positions[index_num]] = true;
-            println!(" fils {:?}", self.field_occupied);
-
             let (x, y) = ((positions[index_num] / 4) as usize, (positions[index_num] % 4) as usize);
-            println!(" new i: {:?}", index_num);
-            println!(" new f: {:?}", (x, y));
-
-
+            self.occupied_field[positions[index_num]] = true;
             self.data[x][y] = 1;
 
             return true;
@@ -41,33 +33,31 @@ impl Matrix {
 
     pub fn new() -> Matrix {
         let mut rng = thread_rng();
-
         let mut data = [[0; 4]; 4];
-        let mut field_occupied = [false; 16];
+        let mut occupied_field = [false; 16];
         let mut init_value_count: u64 = 0;
 
         while init_value_count < 2 {
             let index_num = rng.gen_range(0..16);
 
             let x = (index_num / 4) as usize;
-            let y =(index_num % 4) as usize;
+            let y = (index_num % 4) as usize;
 
             if data[x][y] == 0 {
                 data[x][y] = 1;
-                field_occupied[index_num] = true;
+                occupied_field[index_num] = true;
                 init_value_count += 1;
             }
         }
 
-
         Matrix {
             direction: rng.gen_range(0..4),
             data,
-            field_occupied,
+            occupied_field,
         }
     }
 
-    pub fn move_right_line (&mut self, index: usize) {
+    pub fn move_right_line(&mut self, index: usize) {
         let mut cur_index = 3;
         let mut next_index = 2;
         loop {
@@ -81,13 +71,12 @@ impl Matrix {
                 } else {
                     break;
                 }
-
             } else {
                 if self.data[index][next_index] != 0 {
                     cur_index -= 1;
                 }
 
-                if self.data[index][next_index + 1] == 0 && next_index + 1 != cur_index {
+                if self.data[index][next_index + 1] != 0 && next_index + 1 != cur_index {
                     cur_index = next_index;
                 }
 
@@ -118,15 +107,10 @@ impl Matrix {
         }
 
         self.reset_occupied_field_line(index, Direction::RIGHT);
-        for y in 0..4 {
-            self.data[index][y] = newline[y];
-            if self.data[index][y] > 0 {
-                self.field_occupied[index*4 + y] = true;
-            }
-        }
+        self.redraw_horizontal_line(newline, index);
     }
 
-    pub fn move_left_line (&mut self, index: usize) {
+    pub fn move_left_line(&mut self, index: usize) {
         let mut cur_index = 0;
         let mut next_index = 1;
         while next_index < 4 {
@@ -139,7 +123,7 @@ impl Matrix {
                 if self.data[index][next_index] != 0 {
                     cur_index += 1;
                 }
-                if self.data[index][next_index - 1] == 0 && next_index - 1 != cur_index {
+                if self.data[index][next_index - 1] != 0 && next_index - 1 != cur_index {
                     cur_index = next_index;
                 }
 
@@ -157,15 +141,10 @@ impl Matrix {
         }
 
         self.reset_occupied_field_line(index, Direction::LEFT);
-        for y in 0..4 {
-            self.data[index][y] = newline[y];
-            if self.data[index][y] > 0 {
-                self.field_occupied[index*4 + y] = true;
-            }
-        }
+        self.redraw_horizontal_line(newline, index);
     }
 
-    pub fn move_up_line (&mut self, index: usize) {
+    pub fn move_up_line(&mut self, index: usize) {
         let mut cur_index = 0;
         let mut next_index = 1;
         while next_index < 4 {
@@ -178,7 +157,7 @@ impl Matrix {
                 if self.data[next_index][index] != 0 {
                     cur_index += 1;
                 }
-                if self.data[next_index - 1][index] == 0 && next_index - 1 != cur_index {
+                if self.data[next_index - 1][index] != 0 && next_index - 1 != cur_index {
                     cur_index = next_index;
                 }
                 next_index += 1;
@@ -195,40 +174,39 @@ impl Matrix {
         }
 
         self.reset_occupied_field_line(index, Direction::UP);
-        for x in 0..4 {
-            self.data[x][index] = newline[x];
-            if self.data[x][index] > 0 {
-                self.field_occupied[x * 4 + index] = true;
-            }
-        }
+        self.redraw_vertical_line(newline, index);
     }
 
-    pub fn move_down_line (&mut self, index: usize) {
+    pub fn move_down_line(&mut self, index: usize) {
         let mut cur_index = 3;
         let mut next_index = 2;
         loop {
             if self.data[cur_index][index] != 0 && self.data[cur_index][index] == self.data[next_index][index] {
                 self.data[cur_index][index] *= 2;
                 self.data[next_index][index] = 0;
-
+                if index == 0 {
+                    println!("{:?}", (cur_index, next_index));
+                }
                 if next_index > 1 {
                     cur_index = next_index - 1;
                     next_index = cur_index - 1;
                 } else {
                     break;
                 }
-
             } else {
                 if self.data[next_index][index] != 0 {
                     cur_index -= 1;
                 }
 
-                if self.data[next_index + 1][index] == 0 && next_index + 1 != cur_index {
+                if self.data[next_index + 1][index] != 0 && next_index + 1 != cur_index {
                     cur_index = next_index;
                 }
 
                 if next_index > 0 {
                     next_index -= 1;
+                    if index == 0 {
+                        println!("{:?}", (cur_index, next_index));
+                    }
                 } else {
                     break;
                 }
@@ -252,11 +230,27 @@ impl Matrix {
                 break;
             }
         }
+
+
         self.reset_occupied_field_line(index, Direction::DOWN);
+
+        self.redraw_vertical_line(newline, index);
+    }
+
+    fn redraw_vertical_line(&mut self, newline: [usize; 4], index: usize) {
         for x in 0..4 {
             self.data[x][index] = newline[x];
-            if self.data[x][index] > 0  {
-                self.field_occupied[x * 4 + index] = true;
+            if self.data[x][index] > 0 {
+                self.occupied_field[x * 4 + index] = true;
+            }
+        }
+    }
+
+    fn redraw_horizontal_line(&mut self, newline: [usize; 4], index: usize) {
+        for y in 0..4 {
+            self.data[index][y] = newline[y];
+            if self.data[index][y] > 0 {
+                self.occupied_field[index * 4 + y] = true;
             }
         }
     }
@@ -280,22 +274,19 @@ impl Matrix {
             }
         }
 
-        println!("{:?}",self.field_occupied);
-
-
         return self.get_new_field_index();
     }
 
-    fn reset_occupied_field_line (&mut self, index: usize, direction: Direction) {
+    fn reset_occupied_field_line(&mut self, index: usize, direction: Direction) {
         match direction {
             Direction::UP | Direction::DOWN => {
                 for x in 0..4 {
-                    self.field_occupied[x * 4 + index] = false;
+                    self.occupied_field[x * 4 + index] = false;
                 }
             }
             Direction::LEFT | Direction::RIGHT => {
                 for y in 0..4 {
-                    self.field_occupied[index*4 + y] = false;
+                    self.occupied_field[index * 4 + y] = false;
                 }
             }
         }
@@ -311,59 +302,42 @@ pub enum Direction {
 
 fn main() {
     let mut m = Matrix::new();
-    println!("Hello, world! {:?}", m);
-    let mut rng = thread_rng();
+    println!("Init Stat {:?}", m);
+    m.data = [
+        [1, 0, 0, 1],
+    [0, 0, 0, 2],
+    [0, 0, 2, 4],
+    [1, 2, 4, 8]];
+    println!(" {:?}", m.data[0]);
+    println!(" {:?}", m.data[1]);
+    println!(" {:?}", m.data[2]);
+    println!(" {:?}", m.data[3]);
+    let mut d = String::new();
 
-    for i in 0..100 {
-        println!("ite {:?}", i);
-        match rng.gen_range(0..4) {
-            0 => {
-                println!("up!");
-                if m.move_to(Direction::UP) == false {
-                    println!("up f! {:?}", m.data);
+    loop {
+        d.clear();
+        io::stdin()
+            .read_line(&mut d)
+            .expect("Failed to read line");
 
-                    break;
-                } else {
-                    println!("up t! {:?}", m.data);
+        if d.starts_with("w") {
+            m.move_to(Direction::UP);
 
-                }
-            }
-            1 => {
-                println!("down!");
-                if m.move_to(Direction::DOWN) == false {
-                    println!("down f! {:?}", m.data);
+        } else if d.starts_with("s") {
+            m.move_to(Direction::DOWN);
 
-                    break;
-                } else {
-                    println!("down t! {:?}", m.data);
+        } else if d.starts_with("a") {
+            m.move_to(Direction::LEFT);
 
-                }
-            }
-            2 => {
-                println!("left!");
-
-                if m.move_to(Direction::LEFT) == false {
-                    println!("left f! {:?}", m.data);
-
-                    break;
-                }  else {
-                    println!("left t! {:?}", m.data);
-
-                }
-            }
-            3 => {
-                println!("right!");
-
-                if m.move_to(Direction::RIGHT) == false {
-                    println!("right f! {:?}", m.data);
-
-                    break;
-                } else {
-                    println!("right t! {:?}", m.data);
-
-                }
-            }
-            _ => panic!("error")
+        } else if d.starts_with("d") {
+            m.move_to(Direction::RIGHT);
+        } else if d.starts_with("e") {
+            break;
         }
+
+        println!(" {:?}", m.data[0]);
+        println!(" {:?}", m.data[1]);
+        println!(" {:?}", m.data[2]);
+        println!(" {:?}", m.data[3]);
     }
 }
