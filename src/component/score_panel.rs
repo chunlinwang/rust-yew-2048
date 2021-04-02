@@ -1,0 +1,39 @@
+use yew::prelude::*;
+use yew::services::ConsoleService;
+use yew::{html, Callback};
+
+pub struct ScorePanel{
+    props: Props,
+}
+
+#[derive(Clone, Properties)]
+pub struct Props {
+    pub score: u64,
+    pub best: u64,
+}
+
+impl Component for ScorePanel {
+    type Message = ();
+    type Properties = Props;
+
+    fn create(props: Self::Properties, _: ComponentLink<Self>) -> Self {
+        ScorePanel { props }
+    }
+
+    fn update(&mut self, _: Self::Message) -> ShouldRender {
+        true
+    }
+
+    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+        false
+    }
+
+    fn view(&self) -> Html {
+        html! {
+            <div class="scores-container">
+                <div class="score-container">{self.props.score}</div>
+                <div class="best-container">{self.props.best}</div>
+            </div>
+        }
+    }
+}
