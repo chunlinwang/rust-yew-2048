@@ -88,6 +88,7 @@ impl Matrix {
             if self.data[index][cur_index] != 0 && self.data[index][cur_index] == self.data[index][next_index] {
                 self.data[index][cur_index] *= 2;
                 self.data[index][next_index] = 0;
+                self.score += self.data[index][cur_index] as u64;
 
                 if next_index > 1 {
                     cur_index = next_index - 1;
@@ -141,6 +142,7 @@ impl Matrix {
             if self.data[index][cur_index] != 0 && self.data[index][cur_index] == self.data[index][next_index] {
                 self.data[index][cur_index] *= 2;
                 self.data[index][next_index] = 0;
+                self.score += self.data[index][cur_index] as u64;
                 cur_index = next_index + 1;
                 next_index = cur_index + 1;
             } else {
@@ -175,6 +177,7 @@ impl Matrix {
             if self.data[cur_index][index] != 0 && self.data[cur_index][index] == self.data[next_index][index] {
                 self.data[cur_index][index] *= 2;
                 self.data[next_index][index] = 0;
+                self.score += self.data[cur_index][index] as u64;
                 cur_index = next_index + 1;
                 next_index = cur_index + 1;
             } else {
@@ -208,6 +211,7 @@ impl Matrix {
             if self.data[cur_index][index] != 0 && self.data[cur_index][index] == self.data[next_index][index] {
                 self.data[cur_index][index] *= 2;
                 self.data[next_index][index] = 0;
+                self.score += self.data[cur_index][index] as u64;
                 if index == 0 {
                     println!("{:?}", (cur_index, next_index));
                 }

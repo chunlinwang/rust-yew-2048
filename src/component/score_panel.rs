@@ -6,7 +6,7 @@ pub struct ScorePanel{
     props: Props,
 }
 
-#[derive(Clone, Properties)]
+#[derive(Clone, Properties, PartialEq)]
 pub struct Props {
     pub score: u64,
     pub best: u64,
@@ -24,15 +24,20 @@ impl Component for ScorePanel {
         true
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        let changed = self.props != props;
+        if changed {
+            self.props = props;
+        }
+
+        changed
     }
 
     fn view(&self) -> Html {
         html! {
             <div class="scores-container">
                 <div class="score-container">{self.props.score}</div>
-                <div class="best-container">{self.props.best}</div>
+                // <div class="best-container">{self.props.best}</div>
             </div>
         }
     }

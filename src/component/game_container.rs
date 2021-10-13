@@ -3,7 +3,7 @@ use crate::component::game_line::GameLine;
 use yew::services::ConsoleService;
 use yew::{html, ChildrenWithProps, Component, Html, Properties};
 
-#[derive(Properties, Clone, Debug)]
+#[derive(Properties, Clone, PartialEq, Debug)]
 pub struct Props {
     pub girds: [[usize; 4]; 4],
     // pub children: ChildrenWithProps<GameLine>,
@@ -25,14 +25,20 @@ impl Component for GameContainer {
     }
 
     fn update(&mut self, _: Self::Message) -> ShouldRender {
-        true // 指示组件应该重新渲染
+        true
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        let changed = self.props != props;
+        if changed {
+            self.props = props;
+        }
+
+        changed
     }
 
     fn view(&self) -> Html {
+        ConsoleService::info(format!("game container view {:?}", self.props.girds).as_ref());
         html! {
             <div class="game-container">
                 <div class="game-message">

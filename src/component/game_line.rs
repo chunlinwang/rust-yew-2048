@@ -9,7 +9,7 @@ pub struct GameLine {
     props: Props,
 }
 
-#[derive(Properties, Clone, Debug)]
+#[derive(Properties, Clone, PartialEq, Debug)]
 pub struct Props {
     pub line: [usize; 4],
     pub y: usize,
@@ -25,11 +25,16 @@ impl Component for GameLine {
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        true // 指示组件应该重新渲染
+        true
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
-        false
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
+        let changed = self.props != props;
+        if changed {
+            self.props = props;
+        }
+
+        changed
     }
 
     fn view(&self) -> Html {
