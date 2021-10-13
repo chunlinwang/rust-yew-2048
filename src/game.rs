@@ -7,6 +7,7 @@ pub struct Matrix {
     pub data: [[usize; 4]; 4],
     pub occupied_field: [bool; 16],
     pub score: u64,
+    pub over: bool,
 }
 
 impl Matrix {
@@ -34,10 +35,11 @@ impl Matrix {
             data,
             occupied_field,
             score: 0,
+            over: false,
         }
     }
 
-    pub fn move_to(&mut self, direction: Direction) -> bool {
+    pub fn move_to(&mut self, direction: Direction) {
         for y in 0..4 {
             match direction {
                 Direction::UP => {
@@ -56,7 +58,7 @@ impl Matrix {
             }
         }
 
-        self.get_new_field_index()
+        self.over = !self.get_new_field_index();
     }
 
     fn get_new_field_index(&mut self) -> bool {
