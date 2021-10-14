@@ -7,6 +7,7 @@ pub struct Matrix {
     pub data: [[usize; 4]; 4],
     pub occupied_field: [bool; 16],
     pub score: u64,
+    pub direction_score: [usize; 4], // ['up', 'down', 'left', 'right']
     pub over: bool,
 }
 
@@ -35,6 +36,7 @@ impl Matrix {
             data,
             occupied_field,
             score: 0,
+            direction_score: [0; 4],
             over: false,
         }
     }
@@ -58,7 +60,41 @@ impl Matrix {
             }
         }
 
-        self.over = !self.get_new_field_index();
+        let direction_status: bool = self.get_new_field_index();
+
+        self.is_over(direction, direction_status);
+    }
+
+    fn is_over(&mut self, direction: Direction, status: bool) {
+        let direction_score: usize = if status {
+            0
+        } else {
+            1
+        };
+
+        match direction {
+            Direction::UP => {
+                self.direction_score[0] = direction_score
+            }
+            Direction::DOWN => {
+                self.direction_score[1] = direction_score
+            }
+            Direction::LEFT => {
+                self.direction_score[2] = direction_score
+            }
+            Direction::RIGHT => {
+                self.direction_score[3] = direction_score
+            }
+            _ => panic!("error"),
+        }
+
+        let sum: usize = self.direction_score.iter().sum();
+
+        if sum == 4 {
+            self.over = true;
+        } else {
+            self.over = false;
+        }
     }
 
     fn get_new_field_index(&mut self) -> bool {

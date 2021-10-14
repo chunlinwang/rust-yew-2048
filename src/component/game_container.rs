@@ -6,25 +6,38 @@ use yew::{html, ChildrenWithProps, Component, Html, Properties};
 #[derive(Properties, Clone, PartialEq, Debug)]
 pub struct Props {
     pub girds: [[usize; 4]; 4],
-    // pub children: ChildrenWithProps<GameLine>,
+    pub is_over: bool,
+}
+
+pub enum Msg {
+    Retry,
 }
 
 #[derive(Debug)]
 pub struct GameContainer {
+    link: ComponentLink<GameContainer>,
     props: Props,
 }
 
 impl Component for GameContainer {
-    type Message = ();
+    type Message = Msg;
     type Properties = Props;
 
     fn create(props: Self::Properties, link: ComponentLink<Self>) -> Self {
         Self {
+            link,
             props,
         }
     }
 
-    fn update(&mut self, _: Self::Message) -> ShouldRender {
+    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+        match msg {
+            Msg::Retry => {
+                let window = yew::utils::window();
+                window.location().reload();
+            }
+        }
+
         true
     }
 
@@ -41,11 +54,24 @@ impl Component for GameContainer {
         ConsoleService::info(format!("game container view {:?}", self.props.girds).as_ref());
         html! {
             <div class="game-container">
-                <div class="game-message">
-                    <div class="lower">
-                        <a class="retry-button">{"Try again"}</a>
-                    </div>
-                </div>
+            {
+                    if {self.props.is_over} {
+                        html! {
+                            <>
+                            <div class=classes!("game-message", "game-over")>
+                                <p>{"Game over!"}</p>
+                            </div>
+                            <div class="game-message">
+                                <div class="lower">
+                                    <a class="retry-button" onclick=self.link.callback(move |_| Msg::Retry)>{"Try again"}</a>
+                                </div>
+                            </div>
+                            </>
+                        }
+                    } else {
+                        html! {}
+                    }
+                }
                 <div class="grid-container">
                     <div class="grid-row">
                         <div class="grid-cell"></div>

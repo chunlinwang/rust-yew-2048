@@ -97,6 +97,8 @@ impl Component for GamePanel {
 
     fn view(&self) -> Html {
         ConsoleService::info(format!("game panel view {:?}", self.matrix.data).as_ref());
+        ConsoleService::info(format!("game panel over status {:?}", self.matrix.over).as_ref());
+        ConsoleService::info(format!("game panel over status {:?}", self.matrix.direction_score).as_ref());
 
         html! {
             <div class="container" ref={self.focus_ref.clone()}>
@@ -105,7 +107,7 @@ impl Component for GamePanel {
                   <ScorePanel score={self.matrix.score} best={0} />
                 </div>
                 <p class="game-intro">{"Join the numbers and get to the"} <strong>{"1024 tile!"}</strong></p>
-                <GameContainer girds={self.matrix.data} />
+                <GameContainer girds={self.matrix.data} is_over={self.matrix.over}/>
             </div>
         }
     }
