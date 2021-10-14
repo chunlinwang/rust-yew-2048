@@ -1,8 +1,8 @@
 # Rust Web assembly game 1024 
 
-## A Rust yew 1024.
-#### The game logic has been developed by Rust Programming Language
-#### The interface of game has been developed by Yew which is a rust framework web assembly
+## A game 1024.
+#### The game logic is developed by Rust Programming Language
+#### The interface of game is developed by Yew which is a rust framework web assembly
 
 
 ## Demo
