@@ -6,7 +6,7 @@
 
 
 ## Demo
-![Demo](https://github.com/chunlinwang/rust-yew-1024/blob/main/assets/images/demo.gif)
+![Demo](https://github.com/chunlinwang/rust-yew-1024/raw/main/assets/images/demo.gif)
 
 ## Features
 * Typical 1024
