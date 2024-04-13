@@ -1,6 +1,6 @@
-# Rust Web assembly game 1024 
+# Rust Web assembly game 2048 
 
-## A game 1024.
+## A game 2048.
 #### The game logic is developed by Rust Programming Language
 #### The interface of game is developed by Yew which is a rust framework web assembly
 
